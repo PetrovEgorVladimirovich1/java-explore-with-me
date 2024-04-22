@@ -9,7 +9,6 @@ import ru.practicum.ewm.stats.mapper.StatsMapper;
 import ru.practicum.ewm.stats.model.Stats;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -20,7 +19,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class StatsServiceImpl implements StatsService {
     private final StatsRepository repository;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
     public void create(StatsDto statsDto) {
@@ -31,14 +29,12 @@ public class StatsServiceImpl implements StatsService {
     }
 
     @Override
-    public List<StatsWithHitsDto> getStats(String start, String end, List<String> uris, Boolean unique) {
+    public List<StatsWithHitsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
         List<StatsWithHitsDto> statsWithHitsDtos = new ArrayList<>();
         if (uris == null) {
-            for (Stats stats : repository.getStatsWithoutUri(LocalDateTime.parse(start, formatter),
-                    LocalDateTime.parse(end, formatter))) {
+            for (Stats stats : repository.getStatsWithoutUri(start, end)) {
                 statsWithHitsDtos.add(new StatsWithHitsDto(stats.getApp(), stats.getUri(),
-                        repository.getCountStats(LocalDateTime.parse(start, formatter),
-                                LocalDateTime.parse(end, formatter), stats.getApp(), stats.getUri())));
+                        repository.getCountStats(start, end, stats.getApp(), stats.getUri())));
             }
             return statsWithHitsDtos.stream()
                     .sorted(Comparator.comparingInt(StatsWithHitsDto::getHits).reversed())
@@ -46,8 +42,7 @@ public class StatsServiceImpl implements StatsService {
         }
         if (unique) {
             for (String uri : uris) {
-                List<Stats> statsList = repository.getStatsUnique(LocalDateTime.parse(start, formatter),
-                        LocalDateTime.parse(end, formatter), uri);
+                List<Stats> statsList = repository.getStatsUnique(start, end, uri);
                 if (!statsList.isEmpty()) {
                     Stats stats = statsList.get(0);
                     statsWithHitsDtos.add(new StatsWithHitsDto(stats.getApp(), stats.getUri(), statsList.size()));
@@ -55,8 +50,7 @@ public class StatsServiceImpl implements StatsService {
             }
         } else {
             for (String uri : uris) {
-                List<Stats> statsList = repository.getStats(LocalDateTime.parse(start, formatter),
-                        LocalDateTime.parse(end, formatter), uri);
+                List<Stats> statsList = repository.getStats(start, end, uri);
                 if (!statsList.isEmpty()) {
                     Stats stats = statsList.get(0);
                     statsWithHitsDtos.add(new StatsWithHitsDto(stats.getApp(), stats.getUri(), statsList.size()));
