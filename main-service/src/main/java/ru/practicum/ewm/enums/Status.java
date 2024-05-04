@@ -1,0 +1,5 @@
+package ru.practicum.ewm.enums;
+
+public enum Status {
+    PENDING, PUBLISHED, CANCELED, CONFIRMED, REJECTED, PUBLISH_EVENT, REJECT_EVENT, SEND_TO_REVIEW, CANCEL_REVIEW
+}
