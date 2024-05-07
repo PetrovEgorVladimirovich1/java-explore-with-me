@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.dto.stats.StatsDto;
 import ru.practicum.ewm.dto.stats.StatsWithHitsDto;
+import ru.practicum.ewm.stats.exceptions.FailBadException;
 import ru.practicum.ewm.stats.mapper.StatsMapper;
 import ru.practicum.ewm.stats.model.Stats;
 
@@ -30,6 +31,9 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public List<StatsWithHitsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+        if (start.isAfter(end)) {
+            throw new FailBadException("Неверное время!");
+        }
         List<StatsWithHitsDto> statsWithHitsDtos = new ArrayList<>();
         if (uris == null) {
             for (Stats stats : repository.getStatsWithoutUri(start, end)) {

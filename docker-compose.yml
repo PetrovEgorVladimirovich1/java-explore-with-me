@@ -1,5 +1,20 @@
 version: '3.8'
 services:
+  main-service:
+    build: main-service
+    image: main_service_image
+    container_name: main-service_container
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - stats-server
+    environment:
+      - STATS_SERVER_URL=http://stats-server:9090
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/ewm
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+
   stats-server:
     build: stats/stats-server
     image: stats_server_image
