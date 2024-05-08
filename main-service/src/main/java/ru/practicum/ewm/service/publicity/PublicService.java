@@ -2,6 +2,7 @@ package ru.practicum.ewm.service.publicity;
 
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.compilation.dto.CompilationDto;
+import ru.practicum.ewm.event.dto.CommentDto;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
 
@@ -23,4 +24,8 @@ public interface PublicService {
                                   HttpServletRequest request);
 
     EventFullDto getEventById(Long id, HttpServletRequest request);
+
+    List<CommentDto> getComments(Long eventId, int from, int size);
+
+    CommentDto getByIdComment(Long id);
 }

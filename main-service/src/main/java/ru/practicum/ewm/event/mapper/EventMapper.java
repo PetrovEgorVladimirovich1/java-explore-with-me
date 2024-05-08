@@ -1,9 +1,8 @@
 package ru.practicum.ewm.event.mapper;
 
 import ru.practicum.ewm.category.mapper.CategoryMapper;
-import ru.practicum.ewm.event.dto.EventFullDto;
-import ru.practicum.ewm.event.dto.EventShortDto;
-import ru.practicum.ewm.event.dto.NewEventDto;
+import ru.practicum.ewm.event.dto.*;
+import ru.practicum.ewm.event.model.Comment;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.user.mapper.UserMapper;
 
@@ -58,5 +57,17 @@ public class EventMapper {
                 event.getState(),
                 event.getTitle(),
                 event.getViews());
+    }
+
+    public static Comment toComment(NewCommentDto newCommentDto) {
+        return new Comment(null, newCommentDto.getText(), null, null, LocalDateTime.now());
+    }
+
+    public static CommentDto toCommentDto(Comment comment) {
+        return new CommentDto(comment.getId(),
+                comment.getText(),
+                comment.getAuthor().getName(),
+                comment.getEvent().getTitle(),
+                comment.getCreatedOn());
     }
 }
