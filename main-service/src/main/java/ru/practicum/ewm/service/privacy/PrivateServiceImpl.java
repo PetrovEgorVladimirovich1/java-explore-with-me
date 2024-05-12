@@ -9,7 +9,9 @@ import ru.practicum.ewm.category.mapper.CategoryMapper;
 import ru.practicum.ewm.enums.Status;
 import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.mapper.EventMapper;
+import ru.practicum.ewm.event.model.Comment;
 import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.repository.CommentRepository;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.event.repository.LocationRepository;
 import ru.practicum.ewm.exceptions.FailConflictException;
@@ -41,6 +43,8 @@ public class PrivateServiceImpl implements PrivateService {
     private final LocationRepository locationRepository;
 
     private final RequestRepository requestRepository;
+
+    private final CommentRepository commentRepository;
 
     private User getUserById(Long userId) {
         Optional<User> user = userRepository.findById(userId);
@@ -224,5 +228,58 @@ public class PrivateServiceImpl implements PrivateService {
         Request request = requestOptional.get();
         request.setStatus(Status.CANCELED);
         return RequestMapper.toParticipationRequestDto(requestRepository.save(request));
+    }
+
+    @Override
+    public CommentDto createComment(Long userId, Long eventId, NewCommentDto newCommentDto) {
+        User user = getUserById(userId);
+        Optional<Event> eventOptional = eventRepository.findById(eventId);
+        if (eventOptional.isEmpty()) {
+            throw new FailIdException("Неверный id события!");
+        }
+        Event event = eventOptional.get();
+        Comment comment = EventMapper.toComment(newCommentDto);
+        comment.setEvent(event);
+        comment.setAuthor(user);
+        comment = commentRepository.save(comment);
+        log.info("Комментарий добавлен. {}", comment);
+        return EventMapper.toCommentDto(comment);
+    }
+
+    @Override
+    public CommentDto updateComment(Long userId, Long eventId, Long commentId, NewCommentDto newCommentDto) {
+        Optional<Comment> commentOptional = commentRepository.findByAuthor_IdAndEvent_IdAndId(userId, eventId, commentId);
+        if (commentOptional.isEmpty()) {
+            throw new FailIdException("Неверный id!");
+        }
+        Comment comment = commentOptional.get();
+        comment.setText(newCommentDto.getText());
+        log.info("Комментарий обновлён. {}", comment);
+        return EventMapper.toCommentDto(commentRepository.save(comment));
+    }
+
+    @Override
+    public void deleteComment(Long userId, Long eventId, Long commentId) {
+        if (commentRepository.findByAuthor_IdAndEvent_IdAndId(userId, eventId, commentId).isEmpty()) {
+            throw new FailIdException("Неверный id!");
+        }
+        commentRepository.deleteById(commentId);
+        log.info("Комментарий удалён.");
+    }
+
+    @Override
+    public List<CommentDto> getComments(Long userId, Long eventId, int from, int size) {
+        return commentRepository.findByAuthor_IdAndEvent_Id(userId, eventId,
+                        PageRequest.of(from / size, size, Sort.by("id"))).stream()
+                .map(EventMapper::toCommentDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CommentDto> getCommentsUser(Long userId, int from, int size) {
+        return commentRepository.findByAuthor_Id(userId,
+                        PageRequest.of(from / size, size, Sort.by("id"))).stream()
+                .map(EventMapper::toCommentDto)
+                .collect(Collectors.toList());
     }
 }

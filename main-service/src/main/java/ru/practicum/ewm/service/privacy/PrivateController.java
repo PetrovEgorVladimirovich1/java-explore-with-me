@@ -77,4 +77,43 @@ public class PrivateController {
                                                  @Positive @NotNull @PathVariable Long requestId) {
         return service.cancelRequest(userId, requestId);
     }
+
+    @PostMapping("/events/{eventId}/comments")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentDto createComment(@Positive @NotNull @PathVariable Long userId,
+                                    @Positive @NotNull @PathVariable Long eventId,
+                                    @Valid @RequestBody NewCommentDto newCommentDto) {
+        return service.createComment(userId, eventId, newCommentDto);
+    }
+
+    @PatchMapping("/events/{eventId}/comments/{commentId}")
+    public CommentDto updateComment(@Positive @NotNull @PathVariable Long userId,
+                                    @Positive @NotNull @PathVariable Long eventId,
+                                    @Positive @NotNull @PathVariable Long commentId,
+                                    @Valid @RequestBody NewCommentDto newCommentDto) {
+        return service.updateComment(userId, eventId, commentId, newCommentDto);
+    }
+
+    @DeleteMapping("/events/{eventId}/comments/{commentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteComment(@Positive @NotNull @PathVariable Long userId,
+                              @Positive @NotNull @PathVariable Long eventId,
+                              @Positive @NotNull @PathVariable Long commentId) {
+        service.deleteComment(userId, eventId, commentId);
+    }
+
+    @GetMapping("/events/{eventId}/comments")
+    public List<CommentDto> getComments(@Positive @NotNull @PathVariable Long userId,
+                                        @Positive @NotNull @PathVariable Long eventId,
+                                        @RequestParam(name = "from", defaultValue = "0") int from,
+                                        @RequestParam(name = "size", defaultValue = "10") int size) {
+        return service.getComments(userId, eventId, from, size);
+    }
+
+    @GetMapping("/comments")
+    public List<CommentDto> getCommentsUser(@Positive @NotNull @PathVariable Long userId,
+                                            @RequestParam(name = "from", defaultValue = "0") int from,
+                                            @RequestParam(name = "size", defaultValue = "10") int size) {
+        return service.getCommentsUser(userId, from, size);
+    }
 }

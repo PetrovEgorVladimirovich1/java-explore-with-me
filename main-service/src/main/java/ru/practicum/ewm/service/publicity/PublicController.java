@@ -9,10 +9,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.compilation.dto.CompilationDto;
+import ru.practicum.ewm.event.dto.CommentDto;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -65,5 +68,17 @@ public class PublicController {
     @GetMapping("/events/{id}")
     public EventFullDto getEventById(@PathVariable Long id, HttpServletRequest request) {
         return service.getEventById(id, request);
+    }
+
+    @GetMapping("/events/{eventId}/comments")
+    public List<CommentDto> getComments(@Positive @NotNull @PathVariable Long eventId,
+                                        @RequestParam(name = "from", defaultValue = "0") int from,
+                                        @RequestParam(name = "size", defaultValue = "10") int size) {
+        return service.getComments(eventId, from, size);
+    }
+
+    @GetMapping("/comments/{id}")
+    public CommentDto getByIdComment(@Positive @NotNull @PathVariable Long id) {
+        return service.getByIdComment(id);
     }
 }

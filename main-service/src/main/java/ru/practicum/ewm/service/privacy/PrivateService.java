@@ -24,4 +24,14 @@ public interface PrivateService {
     ParticipationRequestDto createRequest(Long userId, Long eventId);
 
     ParticipationRequestDto cancelRequest(Long userId, Long requestId);
+
+    CommentDto createComment(Long userId, Long eventId, NewCommentDto newCommentDto);
+
+    CommentDto updateComment(Long userId, Long eventId, Long commentId, NewCommentDto newCommentDto);
+
+    void deleteComment(Long userId, Long eventId, Long commentId);
+
+    List<CommentDto> getComments(Long userId, Long eventId, int from, int size);
+
+    List<CommentDto> getCommentsUser(Long userId, int from, int size);
 }

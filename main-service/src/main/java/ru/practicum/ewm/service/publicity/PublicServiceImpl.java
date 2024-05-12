@@ -16,10 +16,13 @@ import ru.practicum.ewm.compilation.repository.CompilationRepository;
 import ru.practicum.ewm.dto.stats.StatsDto;
 import ru.practicum.ewm.enums.Status;
 import ru.practicum.ewm.event.client.StatsInfo;
+import ru.practicum.ewm.event.dto.CommentDto;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.mapper.EventMapper;
+import ru.practicum.ewm.event.model.Comment;
 import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.repository.CommentRepository;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exceptions.FailBadException;
 import ru.practicum.ewm.exceptions.FailIdException;
@@ -42,6 +45,8 @@ public class PublicServiceImpl implements PublicService {
     private final EventRepository eventRepository;
 
     private final StatsInfo statsInfo;
+
+    private final CommentRepository commentRepository;
 
     @Override
     public List<CompilationDto> getCompilations(Boolean pinned, int from, int size) {
@@ -158,5 +163,22 @@ public class PublicServiceImpl implements PublicService {
                 LocalDateTime.now()));
         eventRepository.save(event);
         return EventMapper.toEventFullDto(eventOptional.get());
+    }
+
+    @Override
+    public List<CommentDto> getComments(Long eventId, int from, int size) {
+        return commentRepository.findByEvent_Id(eventId,
+                        PageRequest.of(from / size, size, Sort.by("id"))).stream()
+                .map(EventMapper::toCommentDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public CommentDto getByIdComment(Long id) {
+        Optional<Comment> commentOptional = commentRepository.findById(id);
+        if (commentOptional.isEmpty()) {
+            throw new FailIdException("Неверный id!");
+        }
+        return EventMapper.toCommentDto(commentOptional.get());
     }
 }
